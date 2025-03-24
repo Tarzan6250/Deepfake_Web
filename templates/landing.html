@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepFake Detection - Welcome</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.80/build/spline-viewer.js"></script>
+</head>
+<body class="dark-theme">
+    {% include 'navbar.html' %}
+    
+    <div class="spline-background">
+        <spline-viewer url="https://prod.spline.design/7ko6eGU48QYnevBs/scene.splinecode"></spline-viewer>
+    </div>
+
+    <div class="landing-container">
+        <header class="landing-header">
+            <h1>DeepFake<span class="accent">Detection</span></h1>
+            <p class="subtitle">Unveiling the truth in the digital age</p>
+        </header>
+
+        <div class="info-section">
+            <div class="info-card glass">
+                <h2>What are Deepfakes?</h2>
+                <p>Synthetic media where AI manipulates or generates realistic images and videos, posing new challenges to digital authenticity.</p>
+            </div>
+            <div class="info-card glass">
+                <h2>Our Technology</h2>
+                <p>Advanced AI algorithms analyze media content, detecting subtle patterns and inconsistencies that reveal artificial manipulation.</p>
+            </div>
+            <div class="info-card glass">
+                <h2>Why Choose Us?</h2>
+                <p>State-of-the-art detection with real-time analysis, providing reliable results to help you verify content authenticity.</p>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            {% if 'user_id' in session %}
+            <a href="{{ url_for('upload') }}" class="cta-button glass">
+                Start Detection
+                <span class="button-glow"></span>
+            </a>
+            {% else %}
+            <div class="cta-buttons">
+                <a href="{{ url_for('login') }}" class="cta-button glass">
+                    Get Started
+                    <span class="button-glow"></span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

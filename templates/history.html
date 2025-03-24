@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis History - Deepfake Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+    {% include 'navbar.html' %}
+    
+    <div class="history-container">
+        <h1>Analysis History</h1>
+        {% if history %}
+            <div class="history-grid">
+                {% for item in history %}
+                <div class="history-card glass">
+                    <div class="history-header">
+                        <h3>{{ item.filename }}</h3>
+                        <span class="history-date">{{ item.analyzed_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                    </div>
+                    <div class="history-content">
+                        <div class="result-info">
+                            <p class="result-type">Type: {{ item.result.type }}</p>
+                            <p class="result-prediction">
+                                Prediction: 
+                                <span class="prediction-value {% if item.result.prediction == 'Real' %}real{% else %}fake{% endif %}">
+                                    {{ item.result.prediction }}
+                                </span>
+                            </p>
+                            <p class="result-confidence">Confidence: {{ "%.2f"|format(item.result.confidence * 100) }}%</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-history glass">
+                <p>No analysis history found. Start by analyzing some media!</p>
+                <a href="{{ url_for('upload') }}" class="cta-button glass">Start Analysis</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
