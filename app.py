@@ -1,29 +1,36 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 import os
+import onnxruntime as ort
+import numpy as np
 from PIL import Image
 import cv2
-import numpy as np
-import matlab.engine
 import base64
-from io import BytesIO
-from pymongo import MongoClient
-from dotenv import load_dotenv
+import io
+import matlab.engine
 import bcrypt
 from functools import wraps
 from datetime import datetime
+from dotenv import load_dotenv
+from pymongo import MongoClient
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  
 
 # MongoDB setup
 client = MongoClient(os.getenv('MONGODB_URI'))
 db = client[os.getenv('DB_NAME')]
 users = db.users
 analysis_history = db.analysis_history
+
+# Initialize ONNX model
+onnx_session = ort.InferenceSession(r"C:\Nantha\Projects\deepFake-web-app\xception_crct.onnx")
+onnx_input_name = onnx_session.get_inputs()[0].name
+onnx_output_name = onnx_session.get_outputs()[0].name
+classes = ["fake", "real"]  # Match classify order
 
 # Initialize MATLAB engine
 eng = matlab.engine.start_matlab()
@@ -45,6 +52,48 @@ def login_required(f):
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def preprocess_image(img_data):
+    if isinstance(img_data, str):
+        # If it's a file path
+        img = Image.open(img_data).convert('RGB')
+    else:
+        # If it's bytes data
+        img = Image.open(io.BytesIO(img_data)).convert('RGB')
+    
+    img = np.array(img, dtype=np.float32)
+    img = cv2.resize(img, (299, 299))
+    img = img.transpose(2, 0, 1)  # CHW
+    img = np.expand_dims(img, axis=0)  # Batch dimension
+    img = img.astype(np.float32)
+    return img
+
+def highlight_fake_areas(img):
+    img = img[0].transpose(1, 2, 0) * 255
+    return cv2.rectangle(img.astype(np.uint8), (50, 50), (150, 150), (255, 0, 0), 2)
+
+def deepfake_detection_model(img_data):
+    processed_img = preprocess_image(img_data)
+    scores = onnx_session.run([onnx_output_name], {onnx_input_name: processed_img})[0]
+    confidence = float(np.max(scores))
+    idx = np.argmax(scores)
+    label = classes[idx]
+    
+    # Convert the processed image back for highlighting
+    if label == "fake":
+        result_img = highlight_fake_areas(processed_img)
+    else:
+        result_img = processed_img[0].transpose(1, 2, 0) * 255
+    
+    # Convert the result image to base64 for web display
+    _, buffer = cv2.imencode('.png', result_img.astype(np.uint8))
+    img_base64 = base64.b64encode(buffer).decode('utf-8')
+    
+    return {
+        'label': label,
+        'confidence': confidence * 100,
+        'image': img_base64
+    }
 
 @app.route('/')
 def index():
@@ -133,17 +182,24 @@ def analyze():
         return jsonify({'error': 'Invalid file type'}), 400
 
     try:
-        file_type = file.filename.rsplit('.', 1)[1].lower()
+        # Save the file
+        filename = file.filename
+        upload_path = os.path.join('static', 'uploads', filename)
+        file.save(upload_path)
         
-        if file_type in ['jpg', 'jpeg', 'png']:
-            result = analyze_image(file)
-        else:
-            result = analyze_video(file)
+        # Create a new file object for analysis
+        with open(upload_path, 'rb') as saved_file:
+            file_type = filename.rsplit('.', 1)[1].lower()
+            
+            if file_type in ['jpg', 'jpeg', 'png']:
+                result = deepfake_detection_model(saved_file.read())
+            else:
+                result = analyze_video(saved_file)
         
         # Store analysis result in MongoDB
         analysis_record = {
             'user_id': session['user_id'],
-            'filename': file.filename,
+            'filename': filename,
             'result': result,
             'analyzed_at': datetime.utcnow()
         }
@@ -154,29 +210,6 @@ def analyze():
     except Exception as e:
         print(f"Error during analysis: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
-def analyze_image(file):
-    # Load and process image
-    image = Image.open(file)
-    image_resized = image.resize((299, 299))
-    image_array = np.array(image_resized, dtype=np.uint8)
-    matlab_img = matlab.uint8(image_array.tolist())
-    
-    try:
-        # Analyze with MATLAB model
-        YPred, probs = eng.classify(mat_model, matlab_img, nargout=2)
-        label = str(YPred)
-        probs_list = list(probs[0])
-        confidence = max(probs_list) if probs_list else 0
-        
-        return {
-            'result': 'Real' if label.lower() == 'real' else 'Fake',
-            'confidence': float(confidence * 100),
-            'type': 'image'
-        }
-    except Exception as e:
-        print(f"Error in analyze_image: {str(e)}")
-        raise
 
 def analyze_video(file):
     temp_path = 'temp_video.mp4'

@@ -6,13 +6,38 @@
     <title>Deepfake Detection - Upload</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.82/build/spline-viewer.js"></script>
 </head>
 <body class="dark-theme">    
+    <div class="spline-background">
+        <spline-viewer url="https://prod.spline.design/m-O9cuw65KHz4npQ/scene.splinecode"></spline-viewer>
+    </div>
+
     <div class="container">
         <header>
             <h1>Upload Media</h1>
             <p>Upload an image or video to detect if it's real or fake</p>
         </header>
+
+        <div class="facts-container glass">
+            <div class="fact-card">
+                <h4>Did you know?</h4>
+                <div class="fact-carousel">
+                    <div class="fact-item">
+                        <p>96% of deepfakes online are non-consensual AI-generated videos</p>
+                    </div>
+                    <div class="fact-item">
+                        <p>The deepfake market is expected to reach $11.3 billion by 2026</p>
+                    </div>
+                    <div class="fact-item">
+                        <p>87% of companies see deepfakes as a significant security threat</p>
+                    </div>
+                    <div class="fact-item">
+                        <p>Deepfake detection technology has a 65% success rate on average</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="upload-container glass" id="dropZone">
             <div class="upload-content">

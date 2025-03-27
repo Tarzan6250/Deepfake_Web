@@ -17,7 +17,7 @@
 
     <div class="landing-container">
         <header class="landing-header">
-            <h1>DeepFake<span class="accent">Detection</span></h1>
+            <h1>DeepFake <span class="accent">Detection</span></h1>
             <p class="subtitle">Unveiling the truth in the digital age</p>
         </header>
 
@@ -31,22 +31,43 @@
                 <p>Advanced AI algorithms analyze media content, detecting subtle patterns and inconsistencies that reveal artificial manipulation.</p>
             </div>
             <div class="info-card glass">
-                <h2>Why Choose Us?</h2>
-                <p>State-of-the-art detection with real-time analysis, providing reliable results to help you verify content authenticity.</p>
+                <h2>Impact Cases</h2>
+                <div class="case-carousel">
+                    <div class="case-item">
+                        <div class="case-icon">🎭</div>
+                        <h3>Identity Theft</h3>
+                        <p>73% increase in deepfake-related identity fraud cases in 2024</p>
+                    </div>
+                    <div class="case-item">
+                        <div class="case-icon">💼</div>
+                        <h3>Business Fraud</h3>
+                        <p>$5B lost to deepfake scams in corporate sector</p>
+                    </div>
+                    <div class="case-item">
+                        <div class="case-icon">🗣️</div>
+                        <h3>Misinformation</h3>
+                        <p>52% rise in deepfake videos in political campaigns</p>
+                    </div>
+                    <div class="case-item">
+                        <div class="case-icon">🔒</div>
+                        <h3>Privacy Breach</h3>
+                        <p>2.3M individuals affected by deepfake privacy violations</p>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="cta-section">
             {% if 'user_id' in session %}
-            <a href="{{ url_for('upload') }}" class="cta-button glass">
+            <a href="{{ url_for('upload') }}" class="cta-button neo-button">
                 Start Detection
-                <span class="button-glow"></span>
+                <div class="neo-gradient"></div>
             </a>
             {% else %}
             <div class="cta-buttons">
-                <a href="{{ url_for('login') }}" class="cta-button glass">
+                <a href="{{ url_for('login') }}" class="cta-button neo-button">
                     Get Started
-                    <span class="button-glow"></span>
+                    <div class="neo-gradient"></div>
                 </a>
             </div>
             {% endif %}

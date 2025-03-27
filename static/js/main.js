@@ -42,17 +42,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showResult(result) {
-        const isReal = result.result.toLowerCase() === 'real';
+        const isReal = result.label.toLowerCase() === 'real';
         const resultClass = isReal ? 'success' : 'danger';
         const resultIcon = isReal ? '✓' : '✗';
         
         resultText.innerHTML = `
             <h2 class="${resultClass}" style="font-size: 2em; margin-bottom: 0.5em;">
-                ${resultIcon} ${result.result.toUpperCase()}
+                ${resultIcon} ${result.label.toUpperCase()}
             </h2>
             <p style="font-size: 1.2em; margin-bottom: 1em;">
-                This ${result.type} is ${isReal ? 'authentic' : 'likely manipulated'}.
+                This image is ${isReal ? 'authentic' : 'likely manipulated'}.
             </p>
+            <img src="data:image/png;base64,${result.image}" alt="Analysis Result" style="max-width: 100%; margin-top: 1em;">
         `;
 
         confidenceBar.style.width = `${result.confidence}%`;

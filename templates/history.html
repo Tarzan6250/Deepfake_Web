@@ -6,6 +6,48 @@
     <title>Analysis History - Deepfake Detection</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            margin: auto;
+            display: block;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .history-image {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .history-image:hover {
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body class="dark-theme">
     {% include 'navbar.html' %}
@@ -21,6 +63,10 @@
                         <span class="history-date">{{ item.analyzed_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
                     </div>
                     <div class="history-content">
+                        <img src="{{ url_for('static', filename='uploads/' + item.filename) }}" 
+                             alt="{{ item.filename }}" 
+                             class="history-image"
+                             onclick="openModal(this.src)">
                         <div class="result-info">
                             <p class="result-type">Type: {{ item.result.type }}</p>
                             <p class="result-prediction">
@@ -42,5 +88,32 @@
             </div>
         {% endif %}
     </div>
+
+    <!-- Modal for displaying enlarged images -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        function openModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = "block";
+            modalImg.src = imageSrc;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = "none";
+        }
+
+        // Close modal when clicking outside the image
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
